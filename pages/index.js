@@ -1,104 +1,55 @@
-import { Form, Select, InputNumber, Switch, Slider, Button } from 'antd'
+import React, {useEffect} from 'react';
+import millify from "millify";
+import {Typography,Row,Col,Statistic} from "antd";
+import Link from 'next/link';
+import {useGetCryptosQuery} from "../services/cryptoApi";
+import Cryptocurrencies from "./cryptocurrencies";
+import News from "./news";
+import Loader from "../components/Loader";
 
-// Custom DatePicker that uses Day.js instead of Moment.js
-import DatePicker from '../components/DatePicker'
+const {Title} = Typography;
 
-import { SmileFilled } from '@ant-design/icons'
+const Homepage = () => {
 
-import Link from 'next/link'
+    const {data,isFetching} = useGetCryptosQuery(100);
 
-const FormItem = Form.Item
-const Option = Select.Option
+    const globalStats = data?.data?.stats;
 
-const content = {
-  marginTop: '100px',
-}
+    useEffect(() => {
+        if (!isFetching) {
+            console.log(data)
+        }
+    },[])
 
-export default function Home() {
-  return (
-    <div style={content}>
-      <div className="text-center mb-5">
-        <Link href="#">
-          <a className="logo mr-0">
-            <SmileFilled size={48} strokeWidth={1} />
-          </a>
-        </Link>
+    if (isFetching) {
+        return <Loader/>
+    }
 
-        <p className="mb-0 mt-3 text-disabled">Welcome to the world !</p>
-      </div>
-      <div>
-        <Form layout="horizontal">
-          <FormItem
-            label="Input Number"
-            labelCol={{ span: 8 }}
-            wrapperCol={{ span: 8 }}
-          >
-            <InputNumber
-              size="large"
-              min={1}
-              max={10}
-              style={{ width: 100 }}
-              defaultValue={3}
-              name="inputNumber"
-            />
-          </FormItem>
+    return (
+        <>
+            <Title level={2} className={'heading'}>
+                Global Crypto Stats
+            </Title>
+            <Row>
+                <Col span={12}><Statistic title={'Total Cryptocurrencies'} value={globalStats?.total || 0}/></Col>
+                <Col span={12}><Statistic title={'Total Exchanges'} value={millify(globalStats?.totalExchanges || 0)}/></Col>
+                <Col span={12}><Statistic title={'Market Cap'} value={millify(globalStats?.totalMarketCap || 0)}/></Col>
+                <Col span={12}><Statistic title={'Total 24th Volume'} value={millify(globalStats?.total24hVolume || 0)}/></Col>
+                <Col span={12}><Statistic title={'Total Markets'} value={millify(globalStats?.totalMarkets || 0)}/></Col>
+            </Row>
+            <div className={'home-heading-container'}>
+                <Title level={2} className={'home-title'}>Top 10 cryptocurrencies in the world</Title>
+                <Title level={3} className={'show-more'}><Link href={'/cryptocurrencies'}>Show More</Link></Title>
+            </div>
+            <Cryptocurrencies simplified/>
 
-          <FormItem
-            label="Switch"
-            labelCol={{ span: 8 }}
-            wrapperCol={{ span: 8 }}
-          >
-            <Switch defaultChecked name="switch" />
-          </FormItem>
+            <div className={'home-heading-container'}>
+                <Title level={2} className={'home-title'}>Latest Crypto News</Title>
+                <Title level={3} className={'show-more'}><Link href={'/cryptocurrencies'}>Show More</Link></Title>
+            </div>
+            <News simplified/>
+        </>
+    );
+};
 
-          <FormItem
-            label="Slider"
-            labelCol={{ span: 8 }}
-            wrapperCol={{ span: 8 }}
-          >
-            <Slider defaultValue={70} />
-          </FormItem>
-
-          <FormItem
-            label="Select"
-            labelCol={{ span: 8 }}
-            wrapperCol={{ span: 8 }}
-          >
-            <Select
-              size="large"
-              defaultValue="lucy"
-              style={{ width: 192 }}
-              name="select"
-            >
-              <Option value="jack">jack</Option>
-              <Option value="lucy">lucy</Option>
-              <Option value="disabled" disabled>
-                disabled
-              </Option>
-              <Option value="yiminghe">yiminghe</Option>
-            </Select>
-          </FormItem>
-
-          <FormItem
-            label="DatePicker"
-            labelCol={{ span: 8 }}
-            wrapperCol={{ span: 8 }}
-          >
-            <DatePicker name="startDate" />
-          </FormItem>
-          <FormItem
-            style={{ marginTop: 48 }}
-            wrapperCol={{ span: 8, offset: 8 }}
-          >
-            <Button size="large" type="primary" htmlType="submit">
-              OK
-            </Button>
-            <Button size="large" style={{ marginLeft: 8 }}>
-              Cancel
-            </Button>
-          </FormItem>
-        </Form>
-      </div>
-    </div>
-  )
-}
+export default Homepage;
